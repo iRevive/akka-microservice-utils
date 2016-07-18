@@ -1,0 +1,46 @@
+# slick config example
+# Default database configuration
+
+slick {
+  dbs {
+    default {
+      driver = "db.slick.driver.PostgresDriverExtended$"
+      db {
+        driver = "org.postgresql.Driver"
+        url = "jdbc:postgresql://localhost:5432/any?currentSchema=any"
+        schema = "any"
+        user = postgres
+        password = 111111
+        numThreads = 5
+      }
+    }
+  }
+  codegen {
+    included-tables = [
+      "accounts", "bills"
+    ]
+
+    tagged-types-mapping = {
+      "accounts" = ["uuid", "serial_number"]
+    }
+
+    shared-types-mapping = {
+      "bills" = {
+        "transaction_id" = "TransactionID"
+      }
+    }
+
+    shared-types = {
+      "TransactionID" = "java.util.UUID"
+    }
+
+    //must be subtype of enum.EnumLike
+    enum-mapping = {
+      "accounts" = {
+        "status" = "models.enums.AccountStatus"
+      }
+    }
+
+    package = "models"
+  }
+}
