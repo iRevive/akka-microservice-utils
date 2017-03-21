@@ -1,36 +1,51 @@
-name := "akka-microservice-utils"
 
-version := "1.0"
+val commonSettings = Seq(
+  organization := "io.github.irevive",
 
-scalaVersion := "2.11.8"
+  version := "0.0.1",
 
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+  scalaVersion := Version.scala,
 
-val circe = Seq("core", "generic", "parser", "jawn")
-  .map(v => "io.circe" %% s"circe-$v" % "0.4.1")
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-encoding", "UTF-8"/*, "-Xplugin-require:macroparadise"*/),
 
-val slick = Seq("slick", "slick-codegen", "slick-hikaricp")
-  .map(v => "com.typesafe.slick" %% v % "3.1.1")
+  resolvers ++= Seq(Resolvers.sonatype, Resolvers.scalaz, Resolvers.irevive, Resolvers.scalaMeta),
 
-val slickPG = Seq("slick-pg", "slick-pg_date2", "slick-pg_circe-json")
-  .map(v => "com.github.tminglei" %% v % "0.14.1")
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
-val akka = Seq("actor", "stream", "http-experimental", "slf4j")
-  .map(v => "com.typesafe.akka" %% s"akka-$v" % "2.4.7")
+//  addCompilerPlugin(Library.scalaMetaParadise)
+)
 
-val scalaz = Seq("core", "effect")
-  .map(v => "org.scalaz" %% s"scalaz-$v" % "7.2.4")
+lazy val errors = (project in file("./errors"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "akka-utils-errors",
+    libraryDependencies ++= Dependencies.errors
+  )
 
-libraryDependencies ++= Seq(
-  "commons-net" % "commons-net" % "3.5",
-  "org.postgresql" % "postgresql" % "9.4.1208",
-  "ch.qos.logback" % "logback-classic" % "1.1.7",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.4.0",
-  "com.casualmiracles" %% "treelog" % "1.3.0"
-) ++ slick ++ slickPG ++ akka ++ scalaz ++ circe
+lazy val ftp = (project in file("./ftp"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "akka-utils-ftp",
+    libraryDependencies ++= Dependencies.ftp
+  ).aggregate(errors).dependsOn(errors)
 
-sources in(Compile, doc) := Seq.empty
-publishArtifact in(Compile, packageDoc) := false
+lazy val slick = (project in file("./slick"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "akka-utils-slick",
+    libraryDependencies ++= Dependencies.slick
+  ).aggregate(errors).dependsOn(errors)
 
-lazy val root = (project in file("."))
-  .enablePlugins(JavaAppPackaging)
+lazy val `slick-postgres` = (project in file("./slick-postgres"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "akka-utils-slick-postgres",
+    libraryDependencies ++= Dependencies.postgres
+  ).aggregate(slick).dependsOn(slick)
+
+lazy val common = (project in file("./common"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "akka-utils-common",
+    libraryDependencies ++= Dependencies.common
+  ).aggregate(errors).dependsOn(errors)
